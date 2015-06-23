@@ -212,6 +212,7 @@ The following table describes the scalability targets for Premium storage accoun
 </tbody>
 </table>
 
+- Disk capacity does not include the Snapshot capacity.
 - Inbound refers to all data (requests) being sent to a storage account.
 - Outbound refers to all data (responses) being received from a storage account.
 
