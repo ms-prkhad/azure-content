@@ -21,30 +21,19 @@
 
 ## Overview
 
-Premium Storage stores data on the latest technology Solid State Drives (SSDs), delivers high-performance, low-latency disk support for I/O intensive workloads running on Azure Virtual Machines. With Premium Storage, your applications can have up to 32 TB of storage per VM and achieve 50,000 IOPS (input/output operations per second) per VM with extremely low latencies for read operations. This article gives you a guideline on how to migrate your disks, Virtual Machines (VMs) from on-premises or Standard Storage or a different cloud platform to Azure Premium Storage. To get a detailed overview of the Azure Premium Storage offering check out [Premium Storage: High-Performance Storage for Azure Virtual Machine Workloads](storage-premium-storage-preview-portal.md).
+Premium Storage stores data on the latest technology Solid State Drives (SSDs), delivers high-performance, low-latency disk support for I/O intensive workloads running on Azure Virtual Machines. With Premium Storage, your applications can have up to 64 TB of storage per VM and achieve 80,000 IOPS (input/output operations per second) per VM and 2000 MB per second disk throughput per VM with extremely low latencies for read operations. This article gives you a guideline on how to migrate your disks, Virtual Machines (VMs) from on-premises or Standard Storage or a different cloud platform to Azure Premium Storage. To get a detailed overview of the Azure Premium Storage offering check out [Premium Storage: High-Performance Storage for Azure Virtual Machine Workloads](storage-premium-storage-preview-portal.md).
 
 ## Before You Begin 
 
 ### Prerequisites
 - You will need an Azure subscription. If you don’t have one, you can create a one month [free trial](http://azure.microsoft.com/pricing/free-trial/) subscription or visit [Azure Pricing](http://azure.microsoft.com/pricing/) for more options. 
 - To execute PowerShell cmdlets you will need the Microsoft Azure PowerShell module. See [Microsoft Azure Downloads](http://azure.microsoft.com/downloads/) to download the module.
-- When you plan to use Azure VMs running on Premium Storage, you need to use the DS-series VMs. You can use both Standard and Premium Storage disks with DS-series VMs. Premium storage disks will be available with more VM types in the future. For more information on all available Azure VM disk types and sizes, see [Virtual Machine and Cloud Service Sizes for Azure](http://msdn.microsoft.com/library/azure/dn197896.aspx). 
+- When you plan to use Azure VMs running on Premium Storage, you need to use the DS-series or GS-series VMs. You can use both Standard and Premium Storage disks with DS-series or GS-series VMs. For more information on all available Azure VM disk types and sizes, see [Virtual Machine and Cloud Service Sizes for Azure](http://msdn.microsoft.com/library/azure/dn197896.aspx). 
 
 ### Considerations 
 
 #### VM sizes 
-Summarized below are the DS-series VM sizes and their characteristics. Review the performance characteristics of these Premium Storage offerings and choose the most appropriate option for your Azure disks and VM that best suits your workload. Make sure that there is sufficient bandwidth available on your VM to drive the disk traffic.
-
-|VM Size|CPU cores|Max. IOPS|Max. Disk Bandwidth|
-|:---:|:---:|:---:|:---:|
-|**STANDARD_DS1**|1|3,200|32 MB per second|
-|**STANDARD_DS2**|2|6,400|64 MB per second|
-|**STANDARD_DS3**|4|12,800|128 MB per second|
-|**STANDARD_DS4**|8|25,600|256 MB per second|
-|**STANDARD_DS11**|2|6,400|64 MB per second|
-|**STANDARD_DS12**|4|12,800|128 MB per second|
-|**STANDARD_DS13**|8|25,600|256 MB per second|
-|**STANDARD_DS14**|16|50,000|512 MB per second|
+DS-series and GS-series VM sizes have different characteristics like number of CPU cores, Max IOPS per VM, Max Bandwidth per VM. Review the performance characteristics of these VM sizes and choose the most appropriate option for your Azure disks and VM that best suits your workload. Make sure that there is sufficient bandwidth available on your VM to drive the disk traffic. For the most up to date information on VM sizes, see [Sizes for Virtual Machines] (https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/).
 
 #### Disk sizes 
 There are three types of disks that can be used with your VM and each has specific IOPs and throughout limits. Take into consideration these limits when choosing the disk type for your VM based on the needs of your application in terms of capacity, performance, scalability, and peak loads.
@@ -72,7 +61,7 @@ Depending on your workload, determine if additional data disks are necessary for
 By default, disk caching policy is *Read-Only* for all the Premium data disks, and *Read-Write* for the Premium operating system disk attached to the VM. This configuration setting is recommended to achieve the optimal performance for your application’s IOs. For write-heavy or write-only data disks (such as SQL Server log files), disable disk caching so that you can achieve better application performance. The cache settings for existing data disks can be updated using Azure Portal or the *-HostCaching* parameter of the *Set-AzureDataDisk* cmdlet.
 
 #### Location 
-Pick a location where Azure Premium Storage is available. See [Important Things to know about Premium Storage](storage-premium-storage-preview-portal.md#important-things-to-know-about-premium-storage) for up to date information on available locations. VMs located in the same region as the Storage account that stores the disks for VM, will give superior performance than if they are in separate regions. 
+Pick a location where Azure Premium Storage is available. See [Azure Services by Region](http://azure.microsoft.com/regions/#services) for up to date information on available locations. VMs located in the same region as the Storage account that stores the disks for VM, will give superior performance than if they are in separate regions. 
 
 #### Other Azure VM configuration settings 
 
@@ -138,7 +127,7 @@ Now that the VHD is ready, follow the steps described below to upload VHD to Azu
 Create a storage account for maintaining your VHDs. Take into account the following points when planning where to store your VHDs:
 
 - The target storage account could be standard or premium storage depending on your application requirement. 
-- The storage account location must be same as the DS-series Azure VMs you will create in the final stage. You could copy to a new storage account, or plan to use the same storage account based on your needs.
+- The storage account location must be same as the DS-series or GS-series Azure VMs you will create in the final stage. You could copy to a new storage account, or plan to use the same storage account based on your needs.
 - Copy and save the storage account key of the destination storage account for the next stage.
 - For data disks, you can choose to keep some data disks in a standard storage account (for example, disks that have cooler storage), and move disks with heavy IOPS to a premium storage account.
 
@@ -227,7 +216,7 @@ Copy and save the name of this new Azure OS Disk. In the example above, it is *O
 
 #### Data Disk VHD to be attached to new Azure VM instance(s)
 
-After the data disk VHD is uploaded to storage account, register it as an Azure Data Disk so that it can be attached to your new DS Series Azure VM instance.
+After the data disk VHD is uploaded to storage account, register it as an Azure Data Disk so that it can be attached to your new DS Series or GS-series Azure VM instance.
 
 Use these PowerShell cmdlets to register your VHD as an Azure Data Disk. Provide the complete container URL where VHD was copied to.
 
@@ -235,9 +224,9 @@ Use these PowerShell cmdlets to register your VHD as an Azure Data Disk. Provide
 
 Copy and save the name of this new Azure Data Disk. In the example above, it is *DataDisk*.
 
-### Create an Azure DS-series VM  
+### Create an Azure DS-series VM  or GS-series VM
 
-Once the OS image or OS disk are registered, create a new DS-series Azure VM instance. You will be using the operating system image or operating system disk name that you registered. Select the VM type from the Premium Storage tier. In example below, we are using the *Standard_DS2* VM size.  
+Once the OS image or OS disk are registered, create a new DS-series or GS-series Azure VM instance. You will be using the operating system image or operating system disk name that you registered. Select the VM type from the Premium Storage tier. In example below, we are using the *Standard_DS2* VM size.  
 
 >[AZURE.NOTE] Update the disk size to make sure it matches your capacity and performance requirements, and the available Azure disk sizes.  
 
@@ -259,7 +248,7 @@ Next, depending on your scenario, create the Azure VM instance from either the O
 
 #### Generalized Operating System VHD to create multiple Azure VM instances
 
-Create the one or more new DS Series Azure VM instances using the **Azure OS Image** that you registered. Specify this OS Image name in the VM configuration when creating new VM as shown below.
+Create one or more new DS Series or GS-series Azure VM instances using the **Azure OS Image** that you registered. Specify this OS Image name in the VM configuration when creating new VM as shown below.
 
 	$OSImage = Get-AzureVMImage –ImageName "OSImageName"	
 
@@ -271,7 +260,7 @@ Create the one or more new DS Series Azure VM instances using the **Azure OS Ima
 
 #### Unique Operating System VHD to create a single Azure VM instance
 
-Create a new DS series Azure VM instance using the **Azure OS Disk** that you registered. Specify this OS Disk name in the VM configuration when creating the new VM as shown below.
+Create a new DS series or GS-series Azure VM instance using the **Azure OS Disk** that you registered. Specify this OS Disk name in the VM configuration when creating the new VM as shown below.
 
 	$OSDisk = Get-AzureDisk –DiskName "OSDisk"  
 	
@@ -283,7 +272,7 @@ Specify other Azure VM information, such as a cloud service, region, storage acc
 
 ### Attach Data Disk  
 
-Lastly, if you have registered data disk VHDs, attach them to the new DS-series Azure VM.  
+Lastly, if you have registered data disk VHDs, attach them to the new Azure VM you just created.  
 
 Use following PowerShell cmdlet to attach data disk to the new VM and specify the caching policy. In example below the caching policy is set to *ReadOnly*.  
 
